@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import fs from "node:fs";
 
 import lerDadosReceita from './helper/lerReceitas.js';
-
+const receitas = [];
 const PORT = 3333;
 
 const server = createServer((request, response)=>{
@@ -20,7 +20,23 @@ const server = createServer((request, response)=>{
           response.end(JSON.stringify(receitas));
       })      
     }else if(method === "POST" && url === "/receitas"){
-
+        //nome, categoria, ingredientes e modo de preparo.
+           let body = ''
+           request.on('data', (chunk)=>{
+            body += chunk.toString()
+           });
+           request.on('end', ()=>{
+            const receita = JSON.parse(body)
+            if (body.nome === '' || body.categoria === '' || body.ingredientes === '' || body.modoDePreparo === '') {
+                response.writeHead(404, { 'Content-Type': 'application/json' })
+                response.end(JSON.stringify({ message: 'Preencha corretamente' }));
+                return
+            }
+            receita.id = receitas.length + 1
+            receitas.push(receita)
+            response.writeHead(201, { "Content-Type": "application/json" })
+            response.end(JSON.stringify(receitas));
+        })
     }else if(method === "GET" && url.startsWith("/receitas/")){
 
     }else if(method === "PUT" && url.startsWith("/receitas/")){
