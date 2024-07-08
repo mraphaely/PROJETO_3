@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import fs from "node:fs";
 import { v4 as uuidv4 } from 'uuid';
+import { URLSearchParams } from 'node:url'; 
 
 import lerDadosReceita from './helper/lerReceitas.js';
 const receitas = [];
@@ -62,8 +63,12 @@ const server = createServer((request, response)=>{
 
     }else if(method === "DELETE" && url.startsWith("/receitas/")){
 
+    }else if(method === "GET" && url.startsWith("/categorias/")){
+      //localhost:3333/categorias/pato principal
+      const categoria = url.split("/")[2];
     }else if(method === "GET" && url.startsWith("/busca")){
-
+     //localhost:3333/busca?termo=cebola
+     const searchParams =  new URLSearchParams(paramsString);
     }else if(method === "GET" && url.startsWith("/ingredientes")){
 
     }else{
