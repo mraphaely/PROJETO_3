@@ -58,7 +58,17 @@ const server = createServer((request, response) => {
 
     })
   } else if (method === "GET" && url.startsWith("/receitas/")) {
-
+    const id = parseInt(url.split("/")[2])
+    const encontraReceita = receitas.find(
+        (receita) => receita.id === id
+    );
+    if (!receitas) {
+        response.writeHead(404, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify({ message: 'Receita não encontrado.' }));
+        return
+    }
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(encontraReceita));
   } else if (method === "PUT" && url.startsWith("/receitas/")) {
 
   } else if (method === "DELETE" && url.startsWith("/receitas/")) {
