@@ -60,28 +60,48 @@ const server = createServer((request, response) => {
   } else if (method === "GET" && url.startsWith("/receitas/")) {
     const id = parseInt(url.split("/")[2])
     const encontraReceita = receitas.find(
-        (receita) => receita.id === id
+      (receita) => receita.id === id
     );
     if (!receitas) {
-        response.writeHead(404, { 'Content-Type': 'application/json' })
-        response.end(JSON.stringify({ message: 'Receita não encontrado.' }));
-        return
+      response.writeHead(404, { 'Content-Type': 'application/json' })
+      response.end(JSON.stringify({ message: 'Receita não encontrado.' }));
+      return
     }
     response.writeHead(200, { 'Content-Type': 'application/json' })
     response.end(JSON.stringify(encontraReceita));
   } else if (method === "PUT" && url.startsWith("/receitas/")) {
+    const id = parseInt(url.split('/')[2]);
+    let body = ''
+    request.on("data", (chunk) => {
+      body += chunk;
+    })
+    request.on('end', () => {
+      const receitaAtual = JSON.parse(body)
 
+      const indexReceita = receitas.findIndex((receita) => receita.id === id);
+
+      if (indexReceita === -1) {
+        response.writeHead(404, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify({ message: "Receita selecionada não existe." }));
+        return;
+      }
+
+      receitas[indexReceita] = { ...receitas[indexReceita], ...receitaAtual };
+
+      response.writeHead(200, { 'Content-Type': 'application/json' })
+      response.end(JSON.stringify(receitaAtual));
+    });
   } else if (method === "DELETE" && url.startsWith("/receitas/")) {
-      const id = parseInt(url.split('/')[2]);
-      const receita = receitas.findIndex((receita) => receita.id === id);
-      if (receita === -1) {
-        response.writeHead(404, { "Content-Type": "application/json" });
-        response.end(JSON.stringify({ message: "Receita não encontrada" }));
-        return
-        }
-      receitas.splice(receita, 1)
-      response.writeHead(200, {"Content-Type":"application/json"});
-      response.end(JSON.stringify({message: "Receita deletada"}));
+    const id = parseInt(url.split('/')[2]);
+    const receita = receitas.findIndex((receita) => receita.id === id);
+    if (receita === -1) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ message: "Receita não encontrada" }));
+      return
+    }
+    receitas.splice(receita, 1)
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ message: "Receita deletada" }));
   } else if (method === "GET" && url.startsWith("/categorias/")) {
     //localhost:3333/categorias/prato%20principal (replace) -> reduce
     const categoria = url.split("/")[2];
@@ -98,10 +118,10 @@ const server = createServer((request, response) => {
         return
       }
 
-      const resultadoFiltrado = receitas.filter((receita) => 
-          receita.nome.includes(termo) ||
-          receita.categoria.includes(termo) ||
-          receita.ingredientes.some((ingrediente) => ingrediente.includes(termo)) 
+      const resultadoFiltrado = receitas.filter((receita) =>
+        receita.nome.includes(termo) ||
+        receita.categoria.includes(termo) ||
+        receita.ingredientes.some((ingrediente) => ingrediente.includes(termo))
       );
 
       if (resultadoFiltrado.length === 0) {
@@ -117,21 +137,21 @@ const server = createServer((request, response) => {
     const urlParams = new URLSearchParams(url.split("?")[1]);
     const ingrediente = urlParams.get("ingrediente");
 
-    lerDadosReceita((err, receita)=>{
+    lerDadosReceita((err, receita) => {
       if (err) {
         response.writeHead(500, { "Content-Type": "application/json" });
         response.end(JSON.stringify({ message: "Erro ao ler dados das receitas" }));
         return
       }
 
-    const resultado = receitas.filter((receita) => receita.ingrediente.some((ingrediente) => ingrediente.includes("ingrediente")));
-    
+      const resultado = receitas.filter((receita) => receita.ingrediente.some((ingrediente) => ingrediente.includes("ingrediente")));
+
       if (resultadoFiltrado.length === 0) {
         response.writeHead(404, { "Content-Type": "application/json" });
         response.end(JSON.stringify({ message: "Nenhuma receita encontrada com o termo " + termo }));
         return
       }
-      response.writeHead(200, {"Content-Type":"application/json"});
+      response.writeHead(200, { "Content-Type": "application/json" });
       response.end(JSON.stringify(resultado))
     })
   } else {
