@@ -105,7 +105,9 @@ const server = createServer((request, response) => {
   } else if (method === "GET" && url.startsWith("/categorias/")) {
     //localhost:3333/categorias/prato%20principal (replace) -> reduce
     const categoria = url.split("/")[2];
-
+    const urlParams = new URLSearchParams(url.split("/")[1]);
+    const categorias = urlParams.get("categorias");
+    //ver videos e terminar rota!!!
   } else if (method === "GET" && url.startsWith("/busca")) {
     //localhost:3333/busca?termo=cebola
     const urlParams = new URLSearchParams(url.split("?")[1]);
